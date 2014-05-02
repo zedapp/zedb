@@ -2,36 +2,26 @@
 var db;
 zedb.delete("test").then(function() {
     return zedb.open("test", 1, function(db) {
-        console.log("Creating/upgrading data store");
-        // if (db.getObjectStoreNames().contains("todo")) {
-        //     db.deleteObjectStore("todo");
-        // }
-
-        var symbolStore = db.createObjectStore("symbols", {
+        var store = db.createObjectStore("symbols", {
             keyPath: "id"
         });
-
-        symbolStore.createIndex("predIdn", "predIdn", {
+        store.createIndex("path", "path", {
             unique: false
         });
-        symbolStore.createIndex("path", "path", {
-            unique: false
-        });
-
-        symbolStore.add({
-            id: "Index~/app/js/db/db.js:10",
-            name: "Index",
-            path: "/app/js/db/db.js"
-        });
-        symbolStore.add({
+        store.add({
             id: "ObjectStore~/app/js/db/db.js:10",
             name: "ObjectStore",
-            path: "/app/js/db/db.js"
+            locator: "10"
         });
-        symbolStore.add({
-            id: "Database~/app/js/db/db.js:10",
-            name: "Database",
-            path: "/app/js/db/db.js"
+        store.add({
+            id: "FietsStore~/app/js/db/db.js:100",
+            name: "FietsStore",
+            locator: "100"
+        });
+        store.add({
+            id: "HankStore~/app/js/db/db.js:12",
+            name: "HankStore",
+            locator: "12"
         });
     });
 }).then(function(db) {
@@ -47,7 +37,7 @@ zedb.delete("test").then(function() {
 }).then(function() {
     var promises = [];
     var store = db.writeStore("symbols");
-    for(var i = 0; i < 100; i++) {
+    for (var i = 0; i < 100; i++) {
         var sym = {
             id: "Symbol" + i,
             path: "/path/to/file.js"
@@ -56,9 +46,13 @@ zedb.delete("test").then(function() {
     }
     return Promise.all(promises);
 }).then(function() {
-    return db.readStore("symbols").query(">=", "Sy", "<=", "Sy~").then(function(r) {
-        console.log("All symbols starting with 'Sy'", r);
+    console.log("Yhere");
+    return db.readStore("symbols").query(">=", "Sy", "<=", "Sy~", {
+        limit: 10
     });
-}).catch (function(e) {
-    console.error("Error", e);
+}).then(function(r) {
+    console.log("All symbols starting with 'Sy'", r);
+}).
+catch (function(e) {
+    console.error("Error", e.stack);
 });
